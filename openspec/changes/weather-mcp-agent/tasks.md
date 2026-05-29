@@ -25,15 +25,15 @@
 
 ## 5. LLM provider abstraction (Part 2)
 
-- [ ] 5.1 `providers/base.py`: neutral types (`Message`, `ToolSpec`, `ToolCall`, `ToolResultMessage`) + `LLMProvider` interface with a streaming `chat()`
-- [ ] 5.2 `providers/anthropic_provider.py`: adapter translating neutral ⇄ Anthropic (incl. tool-use + streaming) (tests with a stubbed SDK client)
-- [ ] 5.3 `config.py` (pydantic-settings) + `providers/factory.py`: select by `LLM_PROVIDER` (registered: `anthropic`), fail fast on missing key, reject unknown provider naming supported values (tests)
+- [x] 5.1 `providers/base.py`: neutral types (`Message`, `ToolSpec`, `ToolCall`, `ToolResultMessage`) + `LLMProvider` interface with a streaming `chat()`
+- [x] 5.2 `providers/anthropic_provider.py`: adapter translating neutral ⇄ Anthropic (incl. tool-use + streaming) (tests with a stubbed SDK client)
+- [x] 5.3 `config.py` (pydantic-settings) + `providers/factory.py`: select by `LLM_PROVIDER` (registered: `anthropic`), fail fast on missing key, reject unknown provider naming supported values (tests)
 
 ## 6. Agent core
 
-- [ ] 6.1 `mcp_gateway.py`: launch server via stdio, `initialize`, discover tools, `call_tool`; expose tool specs + a `call(name, args)`; surface tool errors as data
-- [ ] 6.2 `observability.py`: `Tracer` seam + `LoggingTracer` (structured logging of provider/tool steps + latency; no secrets)
-- [ ] 6.3 `agent.py`: `AgentSession.send()` bounded loop yielding `AgentEvent`s; tool errors → observations; in-session context; honor `AGENT_MAX_ITERATIONS` (tests with fake provider + fake gateway: tool path, follow-up context, iteration cap, error recovery)
+- [x] 6.1 `mcp_gateway.py`: launch server via stdio, `initialize`, discover tools, `call_tool`; expose tool specs + a `call(name, args)`; surface tool errors as data
+- [x] 6.2 `observability.py`: `Tracer` seam + `LoggingTracer` (structured logging of provider/tool steps + latency; no secrets)
+- [x] 6.3 `agent.py`: `AgentSession.send()` bounded loop yielding `AgentEvent`s; tool errors → observations; in-session context; honor `AGENT_MAX_ITERATIONS` (tests with fake provider + fake gateway: tool path, follow-up context, iteration cap, error recovery)
 
 ## 7. Frontends
 
