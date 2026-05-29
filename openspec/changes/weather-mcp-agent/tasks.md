@@ -1,27 +1,27 @@
 ## 1. Project setup
 
-- [ ] 1.1 Add runtime deps to `pyproject.toml` (`chainlit`) and confirm dev deps; refresh `uv.lock` with `uv lock`
-- [ ] 1.2 `uv sync --extra dev` and confirm `make check` runs (ruff + pytest) on the empty tree
-- [ ] 1.3 Add `tests/conftest.py` fixtures: fake httpx transport, fake `LLMProvider`, fake `MCPGateway`
+- [x] 1.1 Add runtime deps to `pyproject.toml` (`chainlit`) and confirm dev deps; refresh `uv.lock` with `uv lock`
+- [x] 1.2 `uv sync --extra dev` and confirm `make check` runs (ruff + pytest) on the empty tree
+- [x] 1.3 Add `tests/conftest.py` fixtures: fake httpx transport, fake `LLMProvider`, fake `MCPGateway`
 
 ## 2. MCP server — domain (Part 1, no I/O)
 
-- [ ] 2.1 `domain/models.py`: `GeocodedLocation`, `WeatherReport` (pydantic) — pure, no wire formats
-- [ ] 2.2 `domain/errors.py`: `LocationNotFoundError`, `UpstreamWeatherError`
-- [ ] 2.3 `wmo.py`: WMO `weather_code` → description map (+ unit tests)
+- [x] 2.1 `domain/models.py`: `GeocodedLocation`, `WeatherReport` (pydantic) — pure, no wire formats
+- [x] 2.2 `domain/errors.py`: `LocationNotFoundError`, `UpstreamWeatherError`
+- [x] 2.3 `wmo.py`: WMO `weather_code` → description map (+ unit tests)
 
 ## 3. MCP server — clients & caching
 
-- [ ] 3.1 `clients/base.py`: `GeocodingClient` / `WeatherClient` Protocols
-- [ ] 3.2 `clients/open_meteo.py`: async httpx implementations (geocoding + current weather); map non-success/timeout to `UpstreamWeatherError`, empty results to `LocationNotFoundError` (tests via fake transport)
-- [ ] 3.3 `clients/cache.py`: `CachedGeocodingClient` (session) + `CachedWeatherClient` (TTL) Decorators (tests: cache hit, TTL expiry, TTL=0 disables)
+- [x] 3.1 `clients/base.py`: `GeocodingClient` / `WeatherClient` Protocols
+- [x] 3.2 `clients/open_meteo.py`: async httpx implementations (geocoding + current weather); map non-success/timeout to `UpstreamWeatherError`, empty results to `LocationNotFoundError` (tests via fake transport)
+- [x] 3.3 `clients/cache.py`: `CachedGeocodingClient` (session) + `CachedWeatherClient` (TTL) Decorators (tests: cache hit, TTL expiry, TTL=0 disables)
 
 ## 4. MCP server — service & tool
 
-- [ ] 4.1 `service.py`: `WeatherService` orchestrates geocode → fetch → map to `WeatherReport`, raising typed errors (tests with fake clients, incl. both error paths)
-- [ ] 4.2 `server.py`: register `get_current_weather` on FastMCP — schema (location + `units` enum `metric|imperial`, default `metric`, mapped to Open-Meteo `temperature_unit`/`wind_speed_unit`), description ("Use when… Do not use for…"), map domain result/errors to MCP tool output (`isError`)
-- [ ] 4.3 `__main__.py`: build cached clients → service → server; `main()` runs over stdio
-- [ ] 4.4 Smoke-test the server via an in-process MCP client: list tools, call with a known and an unknown location
+- [x] 4.1 `service.py`: `WeatherService` orchestrates geocode → fetch → map to `WeatherReport`, raising typed errors (tests with fake clients, incl. both error paths)
+- [x] 4.2 `server.py`: register `get_current_weather` on FastMCP — schema (location + `units` enum `metric|imperial`, default `metric`, mapped to Open-Meteo `temperature_unit`/`wind_speed_unit`), description ("Use when… Do not use for…"), map domain result/errors to MCP tool output (`isError`)
+- [x] 4.3 `__main__.py`: build cached clients → service → server; `main()` runs over stdio
+- [x] 4.4 Smoke-test the server via an in-process MCP client: list tools, call with a known and an unknown location
 
 ## 5. LLM provider abstraction (Part 2)
 
