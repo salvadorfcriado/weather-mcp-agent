@@ -37,9 +37,9 @@
 
 ## 7. Frontends
 
-- [ ] 7.1 `ui/repl.py`: terminal REPL consuming the event stream (streamed deltas + tool lines, clean exit)
-- [ ] 7.2 `ui/web.py`: Chainlit app over the same `AgentSession`, surfacing tool-call steps live
-- [ ] 7.3 `weather_agent/__main__.py`: wire config → provider → gateway → agent → REPL; document how to launch the Chainlit UI
+- [x] 7.1 `ui/repl.py`: terminal REPL consuming the event stream (streamed deltas + tool lines, clean exit)
+- [x] 7.2 `ui/web.py`: Chainlit app over the same `AgentSession`, surfacing tool-call steps live
+- [x] 7.3 `weather_agent/__main__.py`: wire config → provider → gateway → agent → REPL; document how to launch the Chainlit UI
 
 ## 8. Packaging & docs
 
