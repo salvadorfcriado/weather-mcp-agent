@@ -141,3 +141,33 @@ async def test_translates_transcript_and_tools_to_anthropic() -> None:
     }
     assert sent[2]["content"][0]["type"] == "tool_result"
     assert sent[2]["content"][0]["tool_use_id"] == "t1"
+
+
+async def test_parallel_tool_results_coalesce_into_one_user_message() -> None:
+    # A single assistant turn with two tool calls yields two ToolResultMessages; the
+    # Messages API requires both tool_results in ONE user message (no consecutive
+    # same-role messages), so the adapter must merge them.
+    final = SimpleNamespace(content=[_text_block("ok")])
+    provider, client = _provider([], final)
+    transcript = [
+        Message(Role.USER, "compare London and Paris"),
+        Message(
+            Role.ASSISTANT,
+            "",
+            tool_calls=(
+                ToolCall("t1", "get_current_weather", {"location": "London"}),
+                ToolCall("t2", "get_current_weather", {"location": "Paris"}),
+            ),
+        ),
+        ToolResultMessage(tool_call_id="t1", content="14°C", is_error=False),
+        ToolResultMessage(tool_call_id="t2", content="18°C", is_error=False),
+    ]
+
+    await _collect(provider.chat(transcript, [], "sys"))
+
+    sent = client.messages.captured["messages"]
+    # user, assistant(2 tool_use), single user with both tool_results.
+    assert [m["role"] for m in sent] == ["user", "assistant", "user"]
+    results = sent[2]["content"]
+    assert [b["type"] for b in results] == ["tool_result", "tool_result"]
+    assert [b["tool_use_id"] for b in results] == ["t1", "t2"]

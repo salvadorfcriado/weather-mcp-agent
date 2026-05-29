@@ -25,26 +25,23 @@ from weather_agent.providers.base import (
 )
 
 
-def _to_anthropic(turn: Turn) -> dict[str, Any]:
-    if isinstance(turn, ToolResultMessage):
-        return {
-            "role": "user",
-            "content": [
-                {
-                    "type": "tool_result",
-                    "tool_use_id": turn.tool_call_id,
-                    "content": turn.content,
-                    "is_error": turn.is_error,
-                }
-            ],
-        }
-    if turn.role == Role.USER:
-        return {"role": "user", "content": turn.text}
+def _tool_result_block(turn: ToolResultMessage) -> dict[str, Any]:
+    return {
+        "type": "tool_result",
+        "tool_use_id": turn.tool_call_id,
+        "content": turn.content,
+        "is_error": turn.is_error,
+    }
+
+
+def _message_to_anthropic(message: Message) -> dict[str, Any]:
+    if message.role == Role.USER:
+        return {"role": "user", "content": message.text}
 
     content: list[dict[str, Any]] = []
-    if turn.text:
-        content.append({"type": "text", "text": turn.text})
-    for call in turn.tool_calls:
+    if message.text:
+        content.append({"type": "text", "text": message.text})
+    for call in message.tool_calls:
         content.append(
             {"type": "tool_use", "id": call.id, "name": call.name, "input": call.arguments}
         )
@@ -52,6 +49,33 @@ def _to_anthropic(turn: Turn) -> dict[str, Any]:
         # Anthropic rejects an empty content array; keep the message valid.
         content.append({"type": "text", "text": "(no content)"})
     return {"role": "assistant", "content": content}
+
+
+def _to_anthropic_messages(turns: list[Turn]) -> list[dict[str, Any]]:
+    """Translate the neutral transcript to Anthropic messages.
+
+    The outcomes of a single assistant turn's tool calls arrive as one
+    `ToolResultMessage` each. The Messages API requires them in a single user message
+    with one `tool_result` block per call (it rejects consecutive same-role messages),
+    so coalesce any run of consecutive tool results into one user message.
+    """
+    messages: list[dict[str, Any]] = []
+    pending_results: list[dict[str, Any]] = []
+
+    def flush_pending() -> None:
+        if pending_results:
+            messages.append({"role": "user", "content": list(pending_results)})
+            pending_results.clear()
+
+    for turn in turns:
+        if isinstance(turn, ToolResultMessage):
+            pending_results.append(_tool_result_block(turn))
+            continue
+        flush_pending()
+        messages.append(_message_to_anthropic(turn))
+
+    flush_pending()
+    return messages
 
 
 def _from_anthropic(message: Any) -> Message:
@@ -86,7 +110,7 @@ class AnthropicProvider:
         tools: list[ToolSpec],
         system: str,
     ) -> AsyncIterator[ProviderEvent]:
-        a_messages = [_to_anthropic(turn) for turn in messages]
+        a_messages = _to_anthropic_messages(messages)
         a_tools = [
             {"name": t.name, "description": t.description, "input_schema": t.input_schema}
             for t in tools
