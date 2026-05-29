@@ -13,9 +13,15 @@ A weather assistant built on the **Model Context Protocol (MCP)**:
 ## Quickstart
 
 ```bash
-uv sync --extra dev          # install (Python >=3.11)
-cp .env.example .env         # then add your LLM API key and pick LLM_PROVIDER
-make run-agent               # start the chat (it launches the MCP server for you)
+cp .env.example .env         # then set ANTHROPIC_API_KEY in .env
+
+# Local (Python >=3.11 + uv):
+uv sync --extra dev
+make run-agent               # terminal REPL (launches the MCP server for you)
+uv run chainlit run src/weather_agent/ui/web.py   # web UI → http://localhost:8000
+
+# Or with Docker (serves the web UI):
+docker compose up --build    # → http://localhost:8000
 ```
 
 Other commands: `make check` (lint + tests), `make run-server`, `make test`.
@@ -26,7 +32,7 @@ Full setup, architecture, and trade-offs: **[`SOLUTION.md`](SOLUTION.md)**.
 
 ```
 src/weather_mcp/     Part 1 — MCP server (domain · clients · service · server)
-src/weather_agent/   Part 2 — providers · mcp_gateway · agent loop · chat REPL
+src/weather_agent/   Part 2 — providers · mcp_gateway · agent loop · ui/ (REPL + Chainlit)
 tests/               unit + integration (no network, no API keys)
 docs/                CONTEXT (glossary) · RESEARCH (sources) · adr/ (decisions)
 openspec/            spec-driven change: proposal → design → specs → tasks

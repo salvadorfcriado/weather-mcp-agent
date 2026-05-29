@@ -43,10 +43,10 @@
 
 ## 8. Packaging & docs
 
-- [ ] 8.1 `Dockerfile` + `docker-compose.yml`: one-command run of the agent (spawns the server); document the env file
-- [ ] 8.2 `.env.example`: finalize defaults (provider, model names, iteration cap, cache TTL, log level)
-- [ ] 8.3 `SOLUTION.md`: language/choices, setup from clean checkout, architecture & trade-offs, dependency licenses, what I'd do next (extra tools, **additional LLM provider adapters e.g. OpenAI** behind the `LLMProvider` port, Langfuse adapter, LLM prompt caching)
-- [ ] 8.4 Update `README.md` if commands changed; ensure `docs/` links resolve
+- [x] 8.1 `Dockerfile` + `docker-compose.yml`: one-command run of the agent (spawns the server); document the env file
+- [x] 8.2 `.env.example`: finalize defaults (provider, model names, iteration cap, cache TTL, log level)
+- [x] 8.3 `SOLUTION.md`: language/choices, setup from clean checkout, architecture & trade-offs, dependency licenses, what I'd do next (extra tools, **additional LLM provider adapters e.g. OpenAI** behind the `LLMProvider` port, Langfuse adapter, LLM prompt caching)
+- [x] 8.4 Update `README.md` if commands changed; ensure `docs/` links resolve
 
 ## 9. Verification
 

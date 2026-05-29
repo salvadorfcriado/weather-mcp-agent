@@ -20,6 +20,11 @@ dist/
 .coverage
 htmlcov/
 
+# Chainlit runtime artifacts (auto-generated)
+.chainlit/
+chainlit.md
+.files/
+
 # OS / editor
 .DS_Store
 *.swp
