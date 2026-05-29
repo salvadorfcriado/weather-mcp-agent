@@ -23,7 +23,7 @@ cp .env.example .env        # then set ANTHROPIC_API_KEY in .env
 uv sync --extra dev                                  # install
 uv run weather-agent                                 # terminal REPL
 uv run chainlit run src/weather_agent/ui/web.py      # web UI → http://localhost:8000
-make check                                           # ruff + 44 tests
+make check                                           # ruff + 51 tests
 ```
 
 **Run with Docker** (one command, serves the web UI)
@@ -99,7 +99,7 @@ spec-driven change under [`openspec/changes/weather-mcp-agent/`](openspec/change
 
 ## Testing
 
-`make check` runs ruff + **44 tests**. Tests inject fakes at the ports (a mock `httpx`
+`make check` runs ruff + **51 tests**. Tests inject fakes at the ports (a mock `httpx`
 transport, a fake `LLMProvider`, a fake `ToolGateway`), so they need **no network and no
 API keys**. The server is exercised through a real in-memory MCP client round-trip. Each
 spec scenario maps to a test.
@@ -112,7 +112,7 @@ follow-up questions that rely on conversation context).
 
 - **Streaming** — token-by-token from the provider through the agent to both UIs.
 - **Web UI** — Chainlit chat that renders the tool calls (input + output) as live steps.
-- **Tests** — unit + in-memory MCP integration (44).
+- **Tests** — unit + in-memory MCP integration (51).
 - **Observability** — structured logging of every provider/tool step with latency, behind
   an extensible `Tracer` seam.
 - **Containerisation** — `Dockerfile` + `docker-compose.yml`, one-command run.
