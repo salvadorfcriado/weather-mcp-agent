@@ -100,6 +100,15 @@ async def test_surfaces_tool_calls_as_neutral() -> None:
     )
 
 
+async def test_empty_assistant_turn_serializes_to_nonempty_content() -> None:
+    # Anthropic rejects an empty content array; the adapter must keep it valid.
+    final = SimpleNamespace(content=[_text_block("ok")])
+    provider, client = _provider([], final)
+    await _collect(provider.chat([Message(Role.ASSISTANT, "")], [], "sys"))
+    sent = client.messages.captured["messages"]
+    assert sent[0]["content"], "assistant content array must not be empty"
+
+
 async def test_translates_transcript_and_tools_to_anthropic() -> None:
     final = SimpleNamespace(content=[_text_block("ok")])
     provider, client = _provider([], final)

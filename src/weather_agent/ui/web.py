@@ -42,22 +42,25 @@ async def on_message(message: cl.Message) -> None:
     await reply.send()
 
     steps: dict[str, cl.Step] = {}
-    async for event in session.send(message.content):
-        if isinstance(event, TextDelta):
-            await reply.stream_token(event.text)
-        elif isinstance(event, ToolCallStarted):
-            step = cl.Step(name=event.tool, type="tool")
-            step.input = event.arguments
-            await step.send()
-            steps[event.id] = step
-        elif isinstance(event, ToolResult):
-            step = steps.get(event.id)
-            if step is not None:
-                step.output = event.summary
-                step.is_error = event.is_error
-                await step.update()
-        elif isinstance(event, Done) and not reply.content:
-            reply.content = event.final_text
+    try:
+        async for event in session.send(message.content):
+            if isinstance(event, TextDelta):
+                await reply.stream_token(event.text)
+            elif isinstance(event, ToolCallStarted):
+                step = cl.Step(name=event.tool, type="tool")
+                step.input = event.arguments
+                await step.send()
+                steps[event.id] = step
+            elif isinstance(event, ToolResult):
+                step = steps.get(event.id)
+                if step is not None:
+                    step.output = event.summary
+                    step.is_error = event.is_error
+                    await step.update()
+            elif isinstance(event, Done) and not reply.content:
+                reply.content = event.final_text
+    except Exception as exc:  # surface failures in the chat instead of a blank reply
+        reply.content = f"⚠️ Sorry, something went wrong: {exc}"
 
     await reply.update()
 

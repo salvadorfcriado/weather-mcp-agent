@@ -42,8 +42,9 @@ The agent-side wrapper around the MCP client session: launches the server, disco
 _Avoid_: client, connection, mcp.
 
 **LLMProvider**:
-The provider-neutral interface the agent talks to for chat + tool-calling. Adapters:
-`AnthropicProvider`, `OpenAIProvider`. The agent never imports a vendor SDK.
+The provider-neutral interface the agent talks to for chat + tool-calling. Shipped
+adapter: `AnthropicProvider` (an `OpenAIProvider` is a documented extension, not shipped).
+The agent never imports a vendor SDK.
 _Avoid_: model, llm, client, backend.
 
 **Agent loop**:

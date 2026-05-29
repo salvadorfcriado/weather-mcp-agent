@@ -14,9 +14,9 @@ class WeatherError(Exception):
 class LocationNotFoundError(WeatherError):
     """Geocoding could not resolve the requested location."""
 
-    def __init__(self, query: str) -> None:
-        self.query = query
-        super().__init__(f"location not found: {query!r}")
+    def __init__(self, location: str) -> None:
+        self.location = location
+        super().__init__(f"location not found: {location!r}")
 
 
 class UpstreamWeatherError(WeatherError):

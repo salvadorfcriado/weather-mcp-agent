@@ -48,14 +48,19 @@ class OpenMeteoGeocodingClient:
             raise LocationNotFoundError(location)
 
         top = results[0]
-        return GeocodedLocation(
-            name=top["name"],
-            latitude=top["latitude"],
-            longitude=top["longitude"],
-            country=top.get("country"),
-            admin1=top.get("admin1"),
-            timezone=top.get("timezone"),
-        )
+        try:
+            return GeocodedLocation(
+                name=top["name"],
+                latitude=top["latitude"],
+                longitude=top["longitude"],
+                country=top.get("country"),
+                admin1=top.get("admin1"),
+                timezone=top.get("timezone"),
+            )
+        except (KeyError, TypeError) as exc:
+            raise UpstreamWeatherError(
+                f"unexpected geocoding response: missing field {exc}"
+            ) from exc
 
 
 class OpenMeteoWeatherClient:

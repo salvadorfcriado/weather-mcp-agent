@@ -65,7 +65,7 @@ async def test_geocode_not_found_message_keeps_original_query(make_http) -> None
     client = OpenMeteoGeocodingClient(make_http(lambda r: httpx.Response(200, json={})))
     with pytest.raises(LocationNotFoundError) as exc:
         await client.geocode("Nowhere, Land")
-    assert exc.value.query == "Nowhere, Land"
+    assert exc.value.location == "Nowhere, Land"
 
 
 async def test_geocode_no_results_raises_location_not_found(make_http) -> None:
@@ -118,6 +118,14 @@ async def test_current_weather_malformed_payload_raises_upstream(make_http) -> N
     client = OpenMeteoWeatherClient(make_http(lambda r: httpx.Response(200, json={"current": {}})))
     with pytest.raises(UpstreamWeatherError):
         await client.get_current(0.0, 0.0, Units.METRIC)
+
+
+async def test_geocode_malformed_result_raises_upstream(make_http) -> None:
+    # A result missing latitude/longitude is a degraded upstream response, not "not found".
+    payload = {"results": [{"name": "Somewhere"}]}
+    client = OpenMeteoGeocodingClient(make_http(lambda r: httpx.Response(200, json=payload)))
+    with pytest.raises(UpstreamWeatherError):
+        await client.geocode("Somewhere")
 
 
 def test_urls_are_open_meteo() -> None:

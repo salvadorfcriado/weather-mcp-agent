@@ -72,5 +72,5 @@ def test_error_hierarchy() -> None:
     assert issubclass(LocationNotFoundError, WeatherError)
     assert issubclass(UpstreamWeatherError, WeatherError)
     err = LocationNotFoundError("Atlantis")
-    assert err.query == "Atlantis"
+    assert err.location == "Atlantis"
     assert "Atlantis" in str(err)

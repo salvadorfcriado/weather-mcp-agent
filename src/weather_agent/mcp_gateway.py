@@ -6,11 +6,12 @@ Protocol (so tests inject a fake); `MCPGateway` is the real stdio-backed impleme
 
 from __future__ import annotations
 
+import json
 import os
 import sys
 from contextlib import AsyncExitStack
 from dataclasses import dataclass
-from typing import Protocol
+from typing import Any, Protocol
 
 from mcp import ClientSession, StdioServerParameters, types
 from mcp.client.stdio import stdio_client
@@ -32,7 +33,7 @@ class ToolGateway(Protocol):
     @property
     def tools(self) -> list[ToolSpec]: ...
 
-    async def call(self, name: str, arguments: dict) -> ToolOutcome: ...
+    async def call(self, name: str, arguments: dict[str, Any]) -> ToolOutcome: ...
 
 
 def default_server_params() -> StdioServerParameters:
@@ -76,11 +77,21 @@ class MCPGateway:
     def tools(self) -> list[ToolSpec]:
         return self._tools
 
-    async def call(self, name: str, arguments: dict) -> ToolOutcome:
+    async def call(self, name: str, arguments: dict[str, Any]) -> ToolOutcome:
         if self._session is None:
             raise RuntimeError("MCPGateway is not connected; use 'async with MCPGateway() as gw'.")
-        result = await self._session.call_tool(name, arguments)
+        try:
+            result = await self._session.call_tool(name, arguments)
+        except Exception as exc:
+            # Transport/protocol failure (e.g. the server died): surface it as data so
+            # the agent loop can feed it back to the model instead of crashing.
+            return ToolOutcome(content=f"tool call failed: {exc}", is_error=True)
+
         text = "\n".join(
             block.text for block in result.content if isinstance(block, types.TextContent)
         )
-        return ToolOutcome(content=text, is_error=bool(result.isError))
+        if not text and result.structuredContent is not None:
+            text = json.dumps(result.structuredContent)
+        return ToolOutcome(
+            content=text or "(tool returned no content)", is_error=bool(result.isError)
+        )

@@ -48,6 +48,9 @@ def _to_anthropic(turn: Turn) -> dict[str, Any]:
         content.append(
             {"type": "tool_use", "id": call.id, "name": call.name, "input": call.arguments}
         )
+    if not content:
+        # Anthropic rejects an empty content array; keep the message valid.
+        content.append({"type": "text", "text": "(no content)"})
     return {"role": "assistant", "content": content}
 
 

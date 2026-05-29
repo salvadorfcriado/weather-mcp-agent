@@ -50,7 +50,7 @@
 
 ## 9. Verification
 
-- [ ] 9.1 `make check` passes (ruff clean, all tests green)
-- [ ] 9.2 Manual end-to-end: real LLM key, ask a weather question + a follow-up, in REPL and in Chainlit
-- [ ] 9.3 Clean-checkout dry run: fresh clone, `uv sync`, `.env`, run — confirm instructions are complete
-- [ ] 9.4 Self-review with `/code-review` (SOLID, separation of concerns) and address findings
+- [x] 9.1 `make check` passes (ruff clean, all tests green)
+- [x] 9.2 Manual end-to-end: real LLM key, ask a weather question + a follow-up, in REPL and in Chainlit
+- [x] 9.3 Clean-checkout dry run: fresh clone, `uv sync`, `.env`, run — confirm instructions are complete
+- [x] 9.4 Self-review with `/code-review` (SOLID, separation of concerns) and address findings
