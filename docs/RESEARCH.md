@@ -33,7 +33,7 @@ from mcp.server.fastmcp import FastMCP
 mcp = FastMCP("weather")
 
 @mcp.tool()
-def get_current_weather(location: str, units: str = "celsius") -> dict:
+def get_current_weather(location: str, units: str = "metric") -> dict:
     """Use when the user asks for current weather conditions in a named place.
     Do not use for multi-day forecasts or historical weather."""
     ...
@@ -78,7 +78,7 @@ From the tool-schema lessons — these choices swing tool-selection accuracy 10�
 - **Name:** `snake_case`, verb-noun, no tense, no args in the name → `get_current_weather`.
 - **Description pattern:** `Use when {condition}. Do not use for {close-but-wrong cases}.`
   The "Do not use for" line disambiguates against neighbours and curbs misfires.
-- **Enum every closed set:** `units: "celsius" | "fahrenheit"`, never bare `string`.
+- **Enum every closed set:** `units: "metric" | "imperial"` (metric→°C/km·h⁻¹, imperial→°F/mph), never bare `string`.
 - **Describe every field**, mark only the true minimum as required.
 - **Atomic over monolithic:** one tight tool beats a `do_everything(action, ...)` switch.
 
@@ -153,9 +153,10 @@ Load-bearing details from the agent lessons:
   requirement, kept in memory per session.
 
 ### Provider abstraction (the central SOLID demonstration)
-The loop depends only on an `LLMProvider` interface (DIP). Concrete `AnthropicProvider`
-and `OpenAIProvider` translate between a neutral message/tool-call shape and each SDK
-(OCP — new provider = new adapter, loop untouched). A factory selects by `LLM_PROVIDER`
+The loop depends only on an `LLMProvider` interface (DIP). The shipped `AnthropicProvider`
+translates between a neutral message/tool-call shape and the SDK; a further `OpenAIProvider`
+is a new adapter behind the same port (OCP — new provider = new adapter, loop untouched),
+documented in `SOLUTION.md` rather than implemented here. A factory selects by `LLM_PROVIDER`
 env var (Strategy + Factory). We deliberately avoid an aggregator like LiteLLM: it would
 hide the very abstraction we are being asked to demonstrate and add a heavy dependency.
 
