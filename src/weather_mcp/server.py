@@ -7,6 +7,8 @@ tool's type hints + docstring generate the MCP input schema and description.
 
 from __future__ import annotations
 
+from collections.abc import Callable
+from contextlib import AbstractAsyncContextManager
 from typing import Any
 
 from mcp.server.fastmcp import FastMCP
@@ -29,9 +31,17 @@ def _report_to_dict(report: WeatherReport) -> dict[str, Any]:
     }
 
 
-def build_server(service: WeatherService) -> FastMCP:
-    """Create a FastMCP server exposing the weather tool over the given service."""
-    mcp = FastMCP("weather")
+def build_server(
+    service: WeatherService,
+    *,
+    lifespan: Callable[[FastMCP], AbstractAsyncContextManager[None]] | None = None,
+) -> FastMCP:
+    """Create a FastMCP server exposing the weather tool over the given service.
+
+    An optional ``lifespan`` lets the caller manage resources (e.g. close the shared
+    HTTP client) around the server's run.
+    """
+    mcp = FastMCP("weather", lifespan=lifespan)
 
     @mcp.tool()
     async def get_current_weather(location: str, units: Units = Units.METRIC) -> dict[str, Any]:
