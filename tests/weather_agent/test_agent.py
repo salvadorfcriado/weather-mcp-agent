@@ -115,6 +115,24 @@ async def test_iteration_budget_is_enforced() -> None:
     assert isinstance(done, Done) and "allowed number of steps" in done.final_text
 
 
+async def test_parallel_tool_calls_in_one_turn_all_execute_in_order() -> None:
+    calls = (
+        ToolCall("t1", "get_current_weather", {"location": "London"}),
+        ToolCall("t2", "get_current_weather", {"location": "Paris"}),
+    )
+    provider = FakeProvider(
+        [([], Message(Role.ASSISTANT, "", tool_calls=calls)), text_turn("compared")]
+    )
+    gateway = FakeGateway(ToolOutcome("ok", False))
+    session = AgentSession(provider, gateway)
+
+    events = await _collect(session, "compare London and Paris")
+
+    # Both tools ran; results are emitted in the calls' original order (ids line up).
+    assert [args["location"] for _, args in gateway.calls] == ["London", "Paris"]
+    assert [e.id for e in events if isinstance(e, ToolResult)] == ["t1", "t2"]
+
+
 async def test_tool_error_becomes_observation_and_recovers() -> None:
     call = ToolCall("t1", "get_current_weather", {"location": "Atlantis"})
     provider = FakeProvider(

@@ -7,17 +7,19 @@ unit-testable with fakes. Conversation context is kept in memory for the session
 
 from __future__ import annotations
 
+import asyncio
 from collections.abc import AsyncIterator
 from dataclasses import dataclass
 from typing import Any
 
-from weather_agent.mcp_gateway import ToolGateway
+from weather_agent.mcp_gateway import ToolGateway, ToolOutcome
 from weather_agent.observability import NullTracer, Tracer
 from weather_agent.providers.base import (
     CompletedTurn,
     LLMProvider,
     Message,
     Role,
+    ToolCall,
     ToolResultMessage,
     Turn,
 )
@@ -108,8 +110,12 @@ class AgentSession:
 
             for call in assistant.tool_calls:
                 yield ToolCallStarted(id=call.id, tool=call.name, arguments=call.arguments)
-                with self._tracer.span("tool.call", tool=call.name):
-                    outcome = await self._gateway.call(call.name, call.arguments)
+
+            outcomes = await asyncio.gather(
+                *(self._invoke_tool(call) for call in assistant.tool_calls)
+            )
+
+            for call, outcome in zip(assistant.tool_calls, outcomes, strict=True):
                 yield ToolResult(id=call.id, summary=outcome.content, is_error=outcome.is_error)
                 self._history.append(
                     ToolResultMessage(
@@ -123,3 +129,7 @@ class AgentSession:
             final_text="I couldn't finish that within the allowed number of steps. "
             "Please try rephrasing your question."
         )
+
+    async def _invoke_tool(self, call: ToolCall) -> ToolOutcome:
+        with self._tracer.span("tool.call", tool=call.name):
+            return await self._gateway.call(call.name, call.arguments)
